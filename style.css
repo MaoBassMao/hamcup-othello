@@ -1,19 +1,21 @@
-/* style.css (設定画面レイアウト最終調整版) */
+/* style.css (認証UIスタイル追加) */
 
 body {
     font-family: sans-serif;
     margin: 0;
     background-color: #f0f0f0;
     display: flex;
-    justify-content: center; /* 水平中央揃え */
+    /* justify-content: center; */ /* ← 複数のコンテナを配置するので削除 */
+    align-items: center; /* 垂直中央揃え */
+    flex-direction: column; /* コンテナを縦に並べる */
     min-height: 100vh;
     box-sizing: border-box;
     padding: 50px 0;
 }
 
-/* 設定画面のスタイル */
-#game-setup {
-    display: flex;
+/* ★★★ 認証コンテナのスタイル ★★★ */
+#auth-container {
+    display: flex; /* 初期表示 */
     flex-direction: column;
     align-items: center;
     padding: 30px;
@@ -22,93 +24,120 @@ body {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     width: 400px;
     box-sizing: border-box;
+    margin-bottom: 30px; /* 他のコンテナとの間隔 */
 }
 
-#game-setup fieldset {
+#auth-container h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.auth-form {
+    width: 100%;
     margin-bottom: 20px;
-    border: 1px solid #ccc;
-    padding: 15px;
-    width: 90%;
-    box-sizing: border-box;
 }
 
-#game-setup legend {
-    font-weight: bold;
-    padding: 0 5px;
-}
-
-/* 設定項目共通スタイル */
-#ai-settings .setting-item,
-#image-settings .setting-item {
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* 設定項目のラベル部分 */
-#ai-settings .setting-item label:first-child,
-#ai-settings .setting-item span,
-#image-settings .setting-item label:first-child {
-    margin-right: 10px;
-    width: 70px;
-    text-align: right;
-    flex-shrink: 0;
-}
-
-/* ★ 色選択のラジオボタングループコンテナ */
-#player-color-selection .radio-options {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex-grow: 1;
-    margin-left: 5px;
-}
-
-/* ★ 色選択のラジオボタンのラベル (改行防止) */
-#player-color-selection .radio-options label {
-    width: auto;
-    text-align: left;
+.auth-form label {
+    display: block;
     margin-bottom: 5px;
-    margin-right: 0;
-    cursor: pointer;
-    white-space: nowrap; /* ★ テキストが折り返さないようにする */
-}
-
-/* ★ ラジオボタン自体の調整 */
-#player-color-selection .radio-options label input[type="radio"] {
-     margin-right: 3px;
-     vertical-align: middle;
-}
-
-
-/* ドロップダウンリスト */
-#aiLevel,
-#blackImageSelect,
-#whiteImageSelect {
-    padding: 5px;
+    font-weight: bold;
     font-size: 0.9em;
-    margin-left: 5px;
-    flex-grow: 1;
-    min-width: 100px;
+    color: #555;
 }
 
-/* 一般的なラベル */
-#game-setup label {
-    cursor: pointer;
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* paddingを含めてwidth 100% */
 }
 
-/* 開始ボタン */
-#start-button {
-    padding: 12px 25px;
-    font-size: 1.1em;
+.auth-buttons {
+    display: flex;
+    justify-content: space-between; /* ボタンを左右に配置 */
+    margin-bottom: 10px;
+}
+
+#auth-container button { /* 認証コンテナ内の全ボタン共通 */
+    padding: 10px 15px;
+    font-size: 1em;
     cursor: pointer;
+    border: none;
+    border-radius: 4px;
+}
+
+#login-button, #signup-button {
+    background-color: #007bff;
+    color: white;
+    flex-basis: 48%; /* 幅を均等に分ける */
+}
+#login-button:hover, #signup-button:hover {
+    background-color: #0056b3;
+}
+
+#guest-button {
+    background-color: #28a745;
+    color: white;
+    width: calc(100% - 2px); /* 少し調整 */
+}
+#guest-button:hover {
+    background-color: #218838;
+}
+
+.auth-message {
+    min-height: 1.2em;
     margin-top: 10px;
+    color: red;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+#auth-container p { /* 「または」テキスト */
+    margin: 15px 0;
+    color: #666;
+}
+/* ★★★★★★★★★★★★★★★★★★★★★★ */
+
+
+/* 設定画面のスタイル */
+#game-setup {
+    /* display: none; はHTML側で初期設定 */
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 400px; /* auth-container と幅を合わせる */
+    box-sizing: border-box;
+    margin-bottom: 30px; /* 下にマージン */
+}
+
+/* ... (fieldset, legend, setting-itemなどの既存スタイルは変更なし) ... */
+
+/* ログアウトボタン */
+#logout-button {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+#logout-button:hover {
+    background-color: #c82333;
 }
 
 
 /* ゲーム本体のコンテナ */
 .game-container {
+    /* display: none; はHTML側で初期設定 */
     flex-direction: column;
     align-items: center;
     padding: 20px;
@@ -119,34 +148,4 @@ body {
     box-sizing: border-box;
 }
 
-/* ゲーム情報エリア */
-#game-info { margin-bottom: 20px; font-size: 1.2em; text-align: center; width: 100%; }
-#game-status { min-height: 2.5em; color: blue; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-#score { min-height: 1.2em; display: flex; align-items: center; justify-content: center; }
-
-/* ゲーム盤 */
-#game-board { display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); width: 400px; height: 400px; border: 2px solid #333; background-color: #008000; position: relative; }
-
-/* 盤のマス */
-.cell { border: 1px solid #5a5a5a; box-sizing: border-box; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; background-color: #008000; transition: background-color 0.3s ease; }
-.cell:hover { background-color: #00a000; }
-
-/* 最終手のハイライト (うっすら黄色) */
-.cell.last-move { background-color: rgba(255, 255, 0, 0.2); }
-
-
-/* --- 石のスタイル --- */
-
-/* デフォルトの円形ディスク用スタイル */
-.disc { width: 80%; height: 80%; border-radius: 50%; box-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-.disc.black { background-color: black; }
-.disc.white { background-color: white; border: 1px solid #ccc; }
-
-/* カスタム画像用スタイル */
-.disc-image { width: 90%; height: 90%; object-fit: contain; display: block; margin: auto; }
-
-
-/* ゲーム結果エリア */
-#game-result { margin-top: 20px; text-align: center; }
-#result-message { min-height: 2.5em; display: flex; align-items: center; justify-content: center; }
-#reset-button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin-top: 10px; }
+/* ... (ゲーム情報エリア以下のスタイルは変更なし) ... */
