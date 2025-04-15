@@ -11,7 +11,7 @@ const POSITIONAL_WEIGHTS = [
     [-20, -40,  -5,  -5,  -5,  -5, -40, -20], [120, -20,  20,   5,   5,  20, -20, 120]
 ];
 const MOBILITY_WEIGHT = 5;
-const AI_MOVE_DELAY = 500;
+const AI_MOVE_DELAY = 750;
 const NUM_IMAGES = 29;
 const DEFAULT_BLACK_VALUE = 'default_black';
 const DEFAULT_WHITE_VALUE = 'default_white';
