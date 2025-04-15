@@ -9,34 +9,48 @@
 </head>
 <body>
 
-    <div id="auth-container">
-        <h2>ログイン または ゲストプレイ</h2>
-
+    <div id="auth-container" style="display: none;"> <h2>ログイン または ゲストプレイ</h2>
         <div class="auth-form">
             <label for="email-input">メールアドレス:</label>
             <input type="email" id="email-input" placeholder="email@example.com">
-
             <label for="password-input">パスワード:</label>
             <input type="password" id="password-input" placeholder="パスワード">
-
             <div class="auth-buttons">
                 <button id="login-button">ログイン</button>
                 <button id="signup-button">新規登録</button>
             </div>
-            <p id="auth-message" class="auth-message"></p> </div>
-
+            <p id="auth-message" class="auth-message"></p>
+        </div>
         <p>または</p>
-
         <button id="guest-button">ゲストとしてプレイ</button>
     </div>
+
     <div id="game-setup" style="display: none;">
         <h1>HamCup オセロ - 設定</h1>
-        <fieldset> <legend>対戦モード選択</legend> <label><input type="radio" name="gameMode" value="hva" checked> 人間 vs AI</label> <label><input type="radio" name="gameMode" value="hvh"> 人間 vs 人間</label> </fieldset>
-        <fieldset id="ai-settings"> <legend>AI 設定</legend> <div class="setting-item"> <label for="aiLevel">AIレベル:</label> <select id="aiLevel" name="aiLevel"> <option value="ai_level1">レベル1</option> <option value="ai_level2" selected>レベル2</option> <option value="ai_level3">レベル3</option> <option value="ai_level4">レベル4</option> <option value="ai_level5">レベル5</option> </select> </div> <div class="setting-item" id="player-color-selection"> <span>あなた:</span> <div class="radio-options"> <label><input type="radio" name="playerColor" value="black" checked> 黒 (先手)</label> <label><input type="radio" name="playerColor" value="white"> 白 (後手)</label> </div> </div> </fieldset>
-        <fieldset id="image-settings"> <legend>石の画像選択</legend> <div class="setting-item"> <label for="blackImageSelect">黒の石:</label> <select id="blackImageSelect" name="blackImage"></select> </div> <div class="setting-item"> <label for="whiteImageSelect">白の石:</label> <select id="whiteImageSelect" name="whiteImage"></select> </div> <small>※ 人間 vs 人間の場合は、黒は奇数、白は偶数の画像のみ選択可能です。</small> </fieldset>
-        <button id="start-button">ゲーム開始</button>
+        <fieldset>
+            <legend>対戦モード選択</legend>
+            <label><input type="radio" name="gameMode" value="hva" checked> 人間 vs AI</label>
+            <label><input type="radio" name="gameMode" value="hvh"> 人間 vs 人間 (オフライン)</label>
+        </fieldset>
+        <fieldset id="ai-settings">
+             <legend>AI 設定</legend>
+             <div class="setting-item"> <label for="aiLevel">AIレベル:</label> <select id="aiLevel" name="aiLevel"><option value="ai_level1">レベル1</option><option value="ai_level2" selected>レベル2</option><option value="ai_level3">レベル3</option><option value="ai_level4">レベル4</option><option value="ai_level5">レベル5</option></select> </div>
+             <div class="setting-item" id="player-color-selection"> <span>あなた:</span> <div class="radio-options"> <label><input type="radio" name="playerColor" value="black" checked> 黒 (先手)</label> <label><input type="radio" name="playerColor" value="white"> 白 (後手)</label> </div> </div>
+        </fieldset>
+        <fieldset id="image-settings">
+             <legend>石の画像選択</legend>
+             <div class="setting-item"> <label for="blackImageSelect">黒の石:</label> <select id="blackImageSelect" name="blackImage"></select> </div>
+             <div class="setting-item"> <label for="whiteImageSelect">白の石:</label> <select id="whiteImageSelect" name="whiteImage"></select> </div>
+             <small>※ 人間 vs 人間の場合は、黒は奇数、白は偶数のみ選択可能です。</small>
+        </fieldset>
+
+        <button id="start-button">ゲーム開始 (オフライン)</button>
+        <button id="online-match-button" style="margin-top: 15px; background-color: #17a2b8; color: white;">
+            オンライン対戦を探す / 開始
+        </button>
         <button id="logout-button" style="margin-top: 20px; display: none;">ログアウト</button>
-        </div>
+    </div>
+
     <div class="game-container" style="display: none;">
         <h1>HamCup オセロ</h1>
         <div id="game-info"> <p>現在のターン: <span id="current-player"></span></p> <p id="game-status" style="min-height: 2.5em; color: blue; font-weight: bold; display: flex; align-items: center; justify-content: center;"></p> <p id="score" style="min-height: 1.2em; display: flex; align-items: center; justify-content: center;"></p> </div>
