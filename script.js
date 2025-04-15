@@ -49,7 +49,19 @@ function populateImageSelectors() { /* ... (内容は変更なし) ... */ } // (
 
 // --- UI 表示切り替え関数 ---
 function showAuthScreen() { if(authContainer) authContainer.style.display = 'flex'; if(gameSetupElement) gameSetupElement.style.display = 'none'; if(gameContainerElement) gameContainerElement.style.display = 'none'; if(logoutButton) logoutButton.style.display = 'none'; }
-function showSetupScreen() { if(authContainer) authContainer.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'flex'; if(gameContainerElement) gameContainerElement.style.display = 'none'; if(logoutButton) logoutButton.style.display = 'inline-block'; }
+// script.js の showSetupScreen 関数を修正
+
+/** 設定画面を表示 */
+function showSetupScreen() {
+    if(authContainer) authContainer.style.display = 'none';
+    if(gameSetupElement) gameSetupElement.style.display = 'flex'; // 設定画面を表示
+    if(gameContainerElement) gameContainerElement.style.display = 'none';
+    if(logoutButton) logoutButton.style.display = 'inline-block';
+
+    // ★★★ 設定画面表示時に画像選択肢を再生成 ★★★
+    populateImageSelectors();
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★
+}
 function showGameScreen() { if(authContainer) authContainer.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'none'; if(gameContainerElement) gameContainerElement.style.display = 'flex'; }
 function setAuthMessage(message, isError = false) { if(authMessage) { authMessage.textContent = message; authMessage.style.color = isError ? 'red' : 'green'; } }
 
