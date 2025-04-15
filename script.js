@@ -5,34 +5,31 @@ const MOBILITY_WEIGHT = 5; const AI_MOVE_DELAY = 500; const NUM_IMAGES = 29; con
 const IMAGE_NAMES = {'001': 'じゃが','002': 'さくら','003': 'プリン','004': 'かぷちーも','005': 'とっとこハム娘。','006': 'くべし','007': 'リョータ','008': 'ハムまろ','009': 'リーゼント丸','010': 'もみじ','011': 'アクア','012': 'うずら','013': 'すいめい','014': 'ハムりん','015': 'ラッキー','016': 'なないろ','017': 'くり坊','018': 'みたらし','019': 'タンゴ','020': 'ついてる','021': 'バク','022': 'このは','023': 'たいあん','024': 'ハムレット','025': 'クリオネア','026': 'むらむすめ','027': 'あんみつ姫','028': 'べにたん','029': 'もな'};
 
 // --- Supabase クライアント初期化 ---
-const SUPABASE_URL = 'https://xrugexrfaeogowiwif.supabase.co'; // ★★★ あなたのURLに書き換える ★★★
+const SUPABASE_URL = 'https://xrugexrfaeogowfwidy.supabase.co'; // ★★★ あなたのURLに書き換える ★★★
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZXVneHJmYWVnb3loZXdmeWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2OTg4ODUsImV4cCI6MjA2MDI3NDg4NX0.QkORDNLczY1cDn7bTRnO6zAbWGYscttj62z7Fx0xkwI'; // ★★★ あなたのanonキーに書き換える ★★★
 let supabaseClient = null;
 try { if (window.supabase) { const { createClient } = window.supabase; supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); console.log('Supabase client initialized:', supabaseClient ? 'OK' : 'Failed'); if (!supabaseClient) throw new Error("Initialization failed"); } else { throw new Error('Supabase library not loaded!'); } } catch (error) { console.error('Error initializing Supabase client:', error); }
 
-// --- グローバル変数 (ゲーム状態など) ---
-let board = []; let currentPlayer = BLACK; let gameOver = false;
-let playerBlackType = 'human'; let playerWhiteType = 'ai_level2';
-let lastMoveRow = -1; let lastMoveCol = -1;
-let playerBlackImage = ''; let playerWhiteImage = '';
-let currentUser = null; let currentGameId = null; let realtimeChannel = null;
-
-// --- HTML要素への参照 (グローバルで宣言し、DOMContentLoadedで取得) ---
-// (nullで初期化しておき、DOM準備完了後に要素を代入)
+// --- HTML要素への参照 (グローバルで宣言) ---
 let authContainer = null; let emailInput = null; let passwordInput = null; let loginButton = null; let signupButton = null; let guestButton = null; let authMessage = null; let gameSetupElement = null; let aiSettingsElement = null; let aiLevelSelect = null; let playerColorRadios = null; let imageSettingsElement = null; let blackImageSelect = null; let whiteImageSelect = null; let startButton = null; let logoutButton = null; let onlineMatchButton = null; let gameContainerElement = null; let boardElement = null; let currentPlayerElement = null; let gameStatusElement = null; let scoreElement = null; let gameResultElement = null; let resultMessageElement = null; let resetButton = null;
 
+// --- グローバル変数 (ゲーム状態など) ---
+let board = []; let currentPlayer = BLACK; let gameOver = false; let playerBlackType = 'human'; let playerWhiteType = 'ai_level2'; let lastMoveRow = -1; let lastMoveCol = -1; let playerBlackImage = ''; let playerWhiteImage = ''; let currentUser = null; let currentGameId = null; let realtimeChannel = null;
 
 // --- Helper Function ---
 function formatImageNumber(num) { return String(num).padStart(3, '0'); }
 
 /** 画像選択のドロップダウンを生成 */
 function populateImageSelectors() {
-    // この関数が呼ばれる時点では、要素は取得済みのはず (DOMContentLoaded内で呼ばれるため)
     console.log('Populating image selectors...');
+    // ★ この関数が呼ばれる前に、gameModeRadios等が取得されている前提
+    if (!blackImageSelect || !whiteImageSelect || !gameModeRadios || gameModeRadios.length === 0) {
+        console.error("Required elements for populateImageSelectors not ready.");
+        return; // 要素がなければ処理中断
+    }
     try {
-        if (!blackImageSelect || !whiteImageSelect || !gameModeRadios) { console.error("Required elements for populateImageSelectors not found inside function."); return; } // 要素存在チェック
         const selectedModeElement = document.querySelector('input[name="gameMode"]:checked');
-        if (!selectedModeElement) { console.warn("No game mode selected yet for populating images."); return; }
+        if (!selectedModeElement) { console.warn("No game mode selected yet."); return; }
         const selectedMode = selectedModeElement.value;
         const currentBlackVal = blackImageSelect.value; const currentWhiteVal = whiteImageSelect.value;
         blackImageSelect.innerHTML = ''; whiteImageSelect.innerHTML = '';
@@ -51,58 +48,61 @@ function populateImageSelectors() {
 
         console.log('Image selectors populated with names.');
     } catch (error) { console.error("Error in populateImageSelectors:", error); }
-} // <<< populateImageSelectors 関数の閉じ括弧
+}
 
 // --- UI 表示切り替え関数 ---
 function showAuthScreen() { if(authContainer) authContainer.style.display = 'flex'; if(gameSetupElement) gameSetupElement.style.display = 'none'; if(gameContainerElement) gameContainerElement.style.display = 'none'; if(logoutButton) logoutButton.style.display = 'none'; }
-function showSetupScreen() { if(authContainer) authContainer.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'flex'; if(gameContainerElement) gameContainerElement.style.display = 'none'; if(logoutButton) logoutButton.style.display = 'inline-block'; populateImageSelectors(); }
+function showSetupScreen() { if(authContainer) authContainer.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'flex'; if(gameContainerElement) gameContainerElement.style.display = 'none'; if(logoutButton) logoutButton.style.display = 'inline-block'; populateImageSelectors(); /* ★ 設定表示時に呼ぶ */ }
 function showGameScreen() { if(authContainer) authContainer.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'none'; if(gameContainerElement) gameContainerElement.style.display = 'flex'; }
 function setAuthMessage(message, isError = false) { if(authMessage) { authMessage.textContent = message; authMessage.style.color = isError ? 'red' : 'green'; } }
 
 // --- 認証関連の処理 ---
-async function handleGuestLogin() { /* ... (変更なし) ... */ }
-async function handleSignup() { /* ... (変更なし) ... */ }
-async function handleLogin() { /* ... (変更なし) ... */ }
-async function handleLogout() { /* ... (変更なし) ... */ }
+async function handleGuestLogin() { /* ... */ }
+async function handleSignup() { /* ... */ }
+async function handleLogin() { /* ... */ }
+async function handleLogout() { /* ... */ }
 
 // --- オンライン対戦関連の関数 ---
-async function handleOnlineMatchmaking() { /* ... (変更なし) ... */ }
-function enterOnlineGame(gameId) { /* ... (変更なし) ... */ }
-function handleRealtimeUpdate(payload) { /* ... (変更なし) ... */ }
-async function fetchAndRenderGameState() { /* ... (変更なし) ... */ }
+async function handleOnlineMatchmaking() { /* ... */ }
+function enterOnlineGame(gameId) { /* ... */ }
+function handleRealtimeUpdate(payload) { /* ... */ }
+async function fetchAndRenderGameState() { /* ... */ }
 
 // --- ゲームロジック等の関数定義 ---
-function renderBoard() { /* ... (変更なし) ... */ }
-function startGame() { /* ... (変更なし) ... */ }
-function initializeGame() { /* ... (変更なし) ... */ }
-function handleBoardClick(event) { if (currentGameId) { handleOnlineMove(event); } else { handleOfflineMove(event); } }
-function handleOfflineMove(event) { /* ... (変更なし) ... */ }
-async function handleOnlineMove(event) { /* ... (変更なし) ... */ }
+function renderBoard() { /* ... */ }
+function startGame() { /* ... */ }
+function initializeGame() { /* ... */ }
+function handleBoardClick(event) { /* ... */ }
+function handleOfflineMove(event) { /* ... */ }
+async function handleOnlineMove(event) { /* ... */ }
+function updateUI() { /* ... */ }
+function setStatusMessage(message) { /* ... */ }
+function isValidMove(row, col, player) { return isValidMoveOnBoard(board, row, col, player); }
 function makeMove(row, col, player) { makeMoveOnBoard(board, row, col, player); }
 function getValidMoves(player) { return getValidMovesForBoard(board, player); }
-function countFlips(row, col, player) { /* ... (変更なし) ... */ }
-function cloneBoard(boardToClone) { /* ... (変更なし) ... */ }
-function makeMoveOnBoard(boardInstance, row, col, player) { /* ... (変更なし) ... */ }
-function evaluateBoard(currentBoard, player) { /* ... (変更なし) ... */ }
-function getValidMovesForBoard(boardState, player) { /* ... (変更なし) ... */ }
-function isValidMoveOnBoard(boardState, row, col, player) { /* ... (変更なし) ... */ }
-function checkAndTriggerAI() { /* ... (変更なし) ... */ }
-function getAIRandomMove(validMoves) { /* ... (変更なし) ... */ }
-function getAIGreedyMove(validMoves, player) { /* ... (変更なし) ... */ }
-function getAIEvaluationMove(validMoves, player) { /* ... (変更なし) ... */ }
-function minimaxAlphaBeta(boardState, depth, isMaximizingPlayer, aiPlayer, alpha, beta) { /* ... (変更なし) ... */ }
-function getAIMinimaxMoveAlphaBeta(validMoves, player, depth) { /* ... (変更なし) ... */ }
-function makeAIMove() { /* ... (変更なし) ... */ }
-function switchPlayer() { /* ... (変更なし) ... */ }
-function endGame() { /* ... (変更なし) ... */ }
-function calculateScore() { /* ... (変更なし) ... */ }
+function countFlips(row, col, player) { /* ... */ }
+function cloneBoard(boardToClone) { /* ... */ }
+function makeMoveOnBoard(boardInstance, row, col, player) { /* ... */ }
+function evaluateBoard(currentBoard, player) { /* ... */ }
+function getValidMovesForBoard(boardState, player) { /* ... */ }
+function isValidMoveOnBoard(boardState, row, col, player) { /* ... */ }
+function checkAndTriggerAI() { /* ... */ }
+function getAIRandomMove(validMoves) { /* ... */ }
+function getAIGreedyMove(validMoves, player) { /* ... */ }
+function getAIEvaluationMove(validMoves, player) { /* ... */ }
+function minimaxAlphaBeta(boardState, depth, isMaximizingPlayer, aiPlayer, alpha, beta) { /* ... */ }
+function getAIMinimaxMoveAlphaBeta(validMoves, player, depth) { /* ... */ }
+function makeAIMove() { /* ... */ }
+function switchPlayer() { /* ... */ }
+function endGame() { /* ... */ }
+function calculateScore() { /* ... */ }
 
 
 // --- ★★★ 初期化処理 & イベントリスナー設定 (DOMContentLoaded内) ★★★ ---
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM fully loaded and parsed');
 
-    // ★ Step 1: HTML要素への参照をここで取得・代入
+    // ★ Step 1: HTML要素への参照をここで取得・代入 ★
     console.log("Getting HTML elements...");
     authContainer = document.getElementById('auth-container');
     emailInput = document.getElementById('email-input');
@@ -114,7 +114,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     gameSetupElement = document.getElementById('game-setup');
     aiSettingsElement = document.getElementById('ai-settings');
     aiLevelSelect = document.getElementById('aiLevel');
-    playerColorRadios = document.querySelectorAll('input[name="playerColor"]'); // NodeList
+    gameModeRadios = document.querySelectorAll('input[name="gameMode"]'); // ★ gameModeRadios をここで取得
+    playerColorRadios = document.querySelectorAll('input[name="playerColor"]');
     imageSettingsElement = document.getElementById('image-settings');
     blackImageSelect = document.getElementById('blackImageSelect');
     whiteImageSelect = document.getElementById('whiteImageSelect');
@@ -131,11 +132,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     resetButton = document.getElementById('reset-button');
     console.log("HTML elements obtained.");
 
-    // ★ Step 2: イベントリスナー設定 (取得した要素に対して)
-    console.log("Setting up event listeners inside DOMContentLoaded...");
+    // ★ Step 2: イベントリスナー設定 (取得した要素に対して) ★
+    console.log("Setting up event listeners...");
     try {
-        // 要素が取得できているか確認してからリスナーを設定
-        if (gameModeRadios) { gameModeRadios.forEach(radio => { radio.addEventListener('change', () => { if(aiSettingsElement) aiSettingsElement.style.display = (radio.value === 'hva') ? 'block' : 'none'; populateImageSelectors(); }); }); } else { console.error("gameModeRadios not found!"); }
+        // 要素の存在をチェックしてからリスナーを設定
+        if (gameModeRadios && gameModeRadios.length > 0) { // NodeListはlengthでチェック
+            gameModeRadios.forEach(radio => { radio.addEventListener('change', () => { if(aiSettingsElement) aiSettingsElement.style.display = (radio.value === 'hva') ? 'block' : 'none'; populateImageSelectors(); }); });
+        } else { console.error("gameModeRadios not found or empty!"); }
+
         if (startButton) { startButton.addEventListener('click', startGame); } else { console.error("Start button not found!"); }
         if (resetButton) { resetButton.addEventListener('click', () => { if(gameContainerElement) gameContainerElement.style.display = 'none'; if(gameResultElement) gameResultElement.style.display = 'none'; if(resetButton) resetButton.style.display = 'none'; if(gameSetupElement) gameSetupElement.style.display = 'flex'; if(realtimeChannel){ try { supabaseClient.removeChannel(realtimeChannel); } catch(e){} realtimeChannel = null; } currentGameId = null; }); } else { console.error("Reset button not found!"); }
         if (boardElement) { boardElement.addEventListener('click', handleBoardClick); } else { console.error("Board element not found!"); }
@@ -144,16 +148,17 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (signupButton) { signupButton.addEventListener('click', handleSignup); } else { console.error("Signup button not found!"); }
         if (logoutButton) { logoutButton.addEventListener('click', handleLogout); } else { console.error("Logout button not found!"); }
         if (onlineMatchButton) { onlineMatchButton.addEventListener('click', handleOnlineMatchmaking); } else { console.error("Online Match button not found!"); }
+
         console.log("Event listeners setup complete.");
     } catch (error) {
         console.error("Error setting up event listeners:", error);
     }
 
-    // ★ Step 3: 画像選択肢を生成 & 初期表示
-    if(aiSettingsElement) aiSettingsElement.style.display = 'block'; // デフォルトはAI設定表示
+    // ★ Step 3: 画像選択肢を生成 & 初期表示設定 ★
+    if (aiSettingsElement) aiSettingsElement.style.display = 'block'; // デフォルト表示
     populateImageSelectors(); // 画像選択肢生成を呼び出し
 
-    // ★ Step 4: 既存セッション確認 & 初期画面表示
+    // ★ Step 4: 既存セッション確認 & 初期画面表示 ★
     if (!supabaseClient) { console.warn("Supabase client not ready, showing auth screen."); showAuthScreen(); return; }
     console.log("Checking existing session...");
     try {
@@ -163,7 +168,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         else { console.log("User not logged in."); showAuthScreen(); }
     } catch(error) { console.error("Error getting session:", error); showAuthScreen(); }
 
-    // ★ Step 5: 認証状態の変化を監視
+    // ★ Step 5: 認証状態の変化を監視 ★
     supabaseClient.auth.onAuthStateChange((event, session) => {
         console.log('Auth state changed:', event, session);
         const prevUser = currentUser?.id;
@@ -173,3 +178,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
 }); // <<< DOMContentLoaded Listener End
+
+// --- 関数の本体 (省略せず全て記述) ---
+// (populateImageSelectors, renderBoard, startGame, initializeGame, handleBoardClick, handleOfflineMove, handleOnlineMove, updateUI, setStatusMessage, isValidMove, makeMove, getValidMoves, countFlips, cloneBoard, makeMoveOnBoard, evaluateBoard, getValidMovesForBoard, isValidMoveOnBoard, checkAndTriggerAI, getAIRandomMove, getAIGreedyMove, getAIEvaluationMove, minimaxAlphaBeta, getAIMinimaxMoveAlphaBeta, makeAIMove, switchPlayer, endGame, calculateScore の完全な定義がここにあることを想定)
